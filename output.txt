@@ -1,0 +1,170 @@
+
+Request: 
+editor.py:
+import editor.gui as gui
+
+def main():
+    gui.main()
+
+
+main()
+
+gui.py:
+import tkinter as tk
+import json
+import uuid
+
+def addtojson(file, new_data):
+    # Path to your JSON file
+    file_path = file
+
+    # Read the existing data from the JSON file
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+
+    # Update the data with the new dictionary entries
+    data.update(new_data)
+
+    # Write the updated data back to the JSON file
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def addnewwidgetgui():
+    entry_var = tk.StringVar()
+    x_pos_var = tk.StringVar()
+    y_pos_var = tk.StringVar()
+    texture_var = tk.StringVar()
+
+    def ok_btn_cmds():
+        uuid_var = entry_var.get().strip()
+        x = x_pos_var.get().strip()
+        y = y_pos_var.get().strip()
+        texture = texture_var.get().strip()
+
+        if not uuid_var or not x or not y or not texture:
+            print("All fields must be filled out.")
+            return
+
+        new_entries = {
+            uuid_var: {
+                "x": x,
+                "y": y,
+                "texture": texture
+            }
+        }
+        addtojson("widgets.json", new_entries)
+        popupwindow.quit()
+
+    max_length = 36
+
+    def limit_length(*args):
+        value = entry_var.get()
+        if len(value) > max_length:
+            entry_var.set(value[:max_length])
+
+    entry_var.trace('w', limit_length)
+
+    def randomuuidgen():
+        insert = str(uuid.uuid1())
+        widgetuuid.delete(0, tk.END)
+        widgetuuid.insert(0, insert)
+
+    popupwindow = tk.Tk()
+    popupwindow.title("New Widget")
+    popupwindow.geometry("330x220")
+
+    for i in range(16):
+        popupwindow.grid_columnconfigure(i, weight=1)
+    for i in range(11):
+        popupwindow.grid_rowconfigure(i, weight=1)
+
+    # UUID
+    widgetuuid_label = tk.Label(popupwindow, text="UUID:")
+    widgetuuid_label.grid(column=8, row=1)
+    widgetuuid = tk.Entry(popupwindow, width=36, textvariable=entry_var)
+    widgetuuid.grid(column=9, row=1)
+    widgetuuid_btn = tk.Button(popupwindow, text="Random", command=randomuuidgen)
+    widgetuuid_btn.grid(column=10, row=1)
+
+    # X Pos
+    x_pos_label = tk.Label(popupwindow, text="X Pos:")
+    x_pos_label.grid(column=8, row=2)
+    x_pos = tk.Entry(popupwindow, width=36, textvariable=x_pos_var)
+    x_pos.grid(column=9, row=2)
+
+    # Y Pos
+    y_pos_label = tk.Label(popupwindow, text="Y Pos:")
+    y_pos_label.grid(column=8, row=3)
+    y_pos = tk.Entry(popupwindow, width=36, textvariable=y_pos_var)
+    y_pos.grid(column=9, row=3)
+
+    # Texture Path
+    texture_path_label = tk.Label(popupwindow, text="Texture:")
+    texture_path_label.grid(column=8, row=4)
+    texture_path = tk.Entry(popupwindow, width=36, textvariable=texture_var)
+    texture_path.grid(column=9, row=4)
+
+    # Ok/Cancel
+    ok_btn = tk.Button(popupwindow, text="Ok", command=ok_btn_cmds)
+    ok_btn.grid(column=7, row=5)
+    cancel_btn = tk.Button(popupwindow, text="Cancel", command=popupwindow.quit)
+    cancel_btn.grid(column=9, row=5)
+
+    # Render
+    popupwindow.mainloop()
+def new_scene():
+    print("New Scene")
+
+def open_scene():
+    print("Open Scene")
+
+def new_widget():
+    addnewwidgetgui()
+
+def main():
+    # Initialize the main window
+    root = tk.Tk()
+    root.title("Editor")
+    root.geometry("1720x840")
+
+    # Configure grid
+    for i in range(3):
+        root.grid_columnconfigure(i, weight=1)
+    root.grid_rowconfigure(0, weight=1)
+
+    # Create the left frame
+    scene_viewer = tk.Frame(root, bg="lightgray")
+    scene_viewer.grid(row=0, column=0, sticky="nsew")
+
+    for i in range(15):
+        scene_viewer.grid_rowconfigure(i, weight=1)
+    for i in range(9):
+        scene_viewer.grid_columnconfigure(i, weight=1)
+
+    # Add widgets
+    scene_viewer_label = tk.Label(scene_viewer, text="Scene Editor")
+    scene_viewer_label.grid(row=0, column=4)
+
+    new_scene_btn = tk.Button(scene_viewer, text="New Scene", command=new_scene)
+    new_scene_btn.grid(row=1, column=3)
+    open_scene_btn = tk.Button(scene_viewer, text="Open Scene", command=open_scene)
+    open_scene_btn.grid(row=1, column=4)
+    new_widget_btn = tk.Button(scene_viewer, text="New Widget", command=new_widget)
+    new_widget_btn.grid(row=1, column=5)
+
+    # Create the center frame
+    center_frame = tk.Frame(root, bg="lightblue")
+    center_frame.grid(row=0, column=1, sticky="nsew")
+
+    center_label = tk.Label(center_frame, text="Resizable Frame")
+    center_label.pack(pady=20)
+
+    # Create the right frame
+    other = tk.Frame(root, bg="lightgray")
+    other.grid(row=0, column=2, sticky="nsew")
+
+    label2 = tk.Label(other, text="1")
+    label2.pack(pady=20)
+
+    # Start the main event loop
+    root.mainloop()
